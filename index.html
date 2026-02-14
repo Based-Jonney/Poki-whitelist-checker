@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Poki Whitelist Checker</title>
+
+<style>
+body{
+  margin:0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:black url("poki-bg.png") center/cover no-repeat;
+  font-family:monospace;
+}
+
+h1{
+  color:yellow;
+  font-size:42px;
+  margin-bottom:40px;
+}
+
+.container{
+  border:3px solid aqua;
+  padding:60px;
+  background:rgba(0,0,0,0.7);
+  text-align:center;
+}
+
+input{
+  padding:15px;
+  width:420px;
+  font-size:16px;
+  margin-bottom:20px;
+}
+
+button{
+  padding:12px 40px;
+  background:aqua;
+  border:none;
+  cursor:pointer;
+}
+
+#result{
+  margin-top:20px;
+  font-size:20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Check your whitelist poki</h1>
+
+<div class="container">
+  <input id="wallet" placeholder="Enter your wallet address">
+  <br>
+  <button onclick="checkWallet()">Check</button>
+  <div id="result"></div>
+</div>
+
+<script>
+
+let whitelistHashes = [];
+
+// تحميل whitelist hashes
+fetch("wallets.json")
+.then(res=>res.json())
+.then(data=>whitelistHashes=data);
+
+
+// hash function
+async function sha256(text){
+  const data=new TextEncoder().encode(text.toLowerCase());
+  const hash=await crypto.subtle.digest("SHA-256",data);
+  return Array.from(new Uint8Array(hash))
+    .map(b=>b.toString(16).padStart(2,"0"))
+    .join("");
+}
+
+
+// check function
+async function checkWallet(){
+
+let wallet=document.getElementById("wallet").value.trim();
+
+if(!wallet.startsWith("0x") || wallet.length!==42){
+  document.getElementById("result").innerHTML="Invalid wallet";
+  return;
+}
+
+let hashed=await sha256(wallet);
+
+if(whitelistHashes.includes(hashed)){
+  document.getElementById("result").innerHTML=
+  "🎉 Congratulations you are poki 👏🎊";
+}
+else{
+  document.getElementById("result").innerHTML=
+  "Sorry you are not poki 🙃";
+}
+
+}
+
+</script>
+
+</body>
+</html>
